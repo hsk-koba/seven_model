@@ -145,6 +145,41 @@ users = User.list([1, 2], with: [:title])
 users.map(&:title) # => ["Mr. ", "Dr. "]
 ```
 
+## Active Record helpers (7.2+)
+
+This gem depends on Active Support only at runtime. Optional helpers that **require Active Record** live under `ComputedModel::ActiveRecord`. They autoload when you reference the constant (after `require "computed_model"`), or you can load explicitly:
+
+```ruby
+require "computed_model"
+require "computed_model/active_record"
+```
+
+Highlights:
+
+- **`records_by_ids` / `records_by_ids_in_order`** — batch `WHERE id IN (...)`, default **`strict_loading`** so missing `includes`/`preload` raises `ActiveRecord::StrictLoadingViolationError`. Pass **`chunk_size:`** to split large id lists (e.g. SQLite bind limits).
+- **`preload_associations!`** — wraps `ActiveRecord::Associations::Preloader` (keyword `records:`) for loader bodies.
+- **`ids_from_relation`** — stable id list from a relation (`reorder(nil)` + `distinct.pluck`).
+- **`bulk_load_and_compute_from_relation`** — plucks ids from a relation, then calls `bulk_load_and_compute` on your wrapper class.
+- **`index_rows_by`** — `column => row` hash for `define_loader` return values.
+
+Example primary loader:
+
+```ruby
+define_primary_loader :raw_user do |_subfields, ids:, **|
+  rows = ComputedModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
+  rows.map { |r| User.new(r) }
+end
+```
+
+Example loader returning a hash keyed by id:
+
+```ruby
+define_loader :things, key: -> { id } do |ids, _subfields, **|
+  rows = Thing.where(user_id: ids)
+  ComputedModel::ActiveRecord.index_rows_by(rows, column: :user_id)
+end
+```
+
 ## Next read
 
 - [Basic concepts and features](CONCEPTS.md)

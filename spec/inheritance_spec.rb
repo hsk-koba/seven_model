@@ -62,7 +62,7 @@ RSpec.describe ComputedModel::Model do
             "foo"
           end
         end
-      }.to raise_error(NoMethodError, /^undefined method `computed' for #<Class:.*>$/)
+      }.to raise_error(NoMethodError, /undefined method `computed' for (?:class )?#<Class:/)
     end
 
     it 'allows redirecting helper methods via ActiveSupport::Concern' do

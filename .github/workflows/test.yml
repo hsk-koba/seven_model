@@ -8,13 +8,14 @@ jobs:
 
     strategy:
       matrix:
-        ruby: ["2.7", "3.0", "3.1"]
-        gemfile: ["Gemfile"]
-        include:
-        - ruby: "2.5"
-          gemfile: gemfiles/activerecord-6.1.gemfile
-        - ruby: "2.6"
-          gemfile: gemfiles/activerecord-6.1.gemfile
+        ruby: ["3.1", "3.2", "3.3"]
+        gemfile: ["Gemfile", "gemfiles/rails-7.2.gemfile", "gemfiles/rails-8.gemfile"]
+        exclude:
+          # Rails 8 requires Ruby >= 3.2
+          - ruby: "3.1"
+            gemfile: "Gemfile"
+          - ruby: "3.1"
+            gemfile: "gemfiles/rails-8.gemfile"
 
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}

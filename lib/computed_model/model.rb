@@ -305,6 +305,8 @@ module ComputedModel::Model
     #       # Create User instances
     #       raw_users.map { |raw_user| User.new(raw_user) }
     #     end
+    #
+    #     # With Active Record 7.2+, see also {ComputedModel::ActiveRecord.records_by_ids_in_order}.
     #   end
     def define_primary_loader(meth_name, &block)
       # TODO: The current API requires the user to initialize a specific instance variable.

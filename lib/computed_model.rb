@@ -17,6 +17,8 @@ require "computed_model/model"
 #
 # See {ComputedModel::Model} for basic usage.
 module ComputedModel
+  autoload :ActiveRecord, "computed_model/active_record"
+
   # An error raised when you tried to read from a loaded/computed attribute,
   # but that attribute isn't loaded by the batch loader.
   class NotLoaded < StandardError; end

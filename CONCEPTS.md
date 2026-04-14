@@ -8,6 +8,10 @@ We don't (yet) support directly including `ComputedModel::Model` into ActiveReco
 In that case, we recommend creating a wrapper class and reference the original class via the primary loader
 (described later).
 
+### Active Record integration (7.2+)
+
+For wrapper primary loaders and `define_loader` blocks backed by Active Record, see **`ComputedModel::ActiveRecord`** (optional: loads Active Record when used). It provides batch loading with **`strict_loading`**, optional **chunked `IN` lists**, **`ActiveRecord::Associations::Preloader`**, helpers to pluck ids from a **`Relation`**, and **`bulk_load_and_compute_from_relation`**. Details and examples are in [README.md](README.md) (section **Active Record helpers (7.2+)**).
+
 ## Fields
 
 **Field** are certain attributes managed by ComputedModel. It's a unit of dependency resolution and

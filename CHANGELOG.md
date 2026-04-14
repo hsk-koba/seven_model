@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Added optional **`ComputedModel::ActiveRecord`** helpers for Active Record 7.2+: `records_by_ids` / `records_by_ids_in_order` now accept **`chunk_size:`** for large `IN` lists, plus **`index_rows_by`** for loader hash keys. Documented in README / CONCEPTS (EN/JA).
+
 ## 0.3.0
 
 computed_model 0.3 comes with a great number of improvements, and a bunch of breaking changes.

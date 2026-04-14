@@ -7,8 +7,8 @@ require "computed_model/version"
 Gem::Specification.new do |spec|
   spec.name          = "computed_model"
   spec.version       = ComputedModel::VERSION
-  spec.authors       = ["Masaki Hara", "Masayuki Izumi", "Wantedly, Inc."]
-  spec.email         = ["ackie.h.gmai@gmail.com", "m@izum.in", "dev@wantedly.com"]
+  spec.authors       = ["Masaki Hara", "Masayuki Izumi", "Wantedly, Inc.", "Itsuki Kobashigawa"]
+  spec.email         = ["ackie.h.gmai@gmail.com", "m@izum.in", "dev@wantedly.com", "itsuki-k@nxvem.jp"]
 
   spec.summary       = %q{Batch loader with dependency resolution and computed fields}
   spec.description   = <<~DSC
@@ -35,14 +35,14 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  # For ActiveSupport::Concern
-  spec.add_development_dependency "activesupport"
+  # ActiveSupport::Concern (lib/computed_model/model.rb)
+  spec.add_runtime_dependency "activesupport", ">= 7.2", "< 9"
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "activerecord", "~> 7.0"
-  spec.add_development_dependency "sqlite3", "~> 1.4"
+  spec.add_development_dependency "activerecord", ">= 7.2", "< 9"
+  spec.add_development_dependency "sqlite3", ">= 1.6.6", "< 3"
   spec.add_development_dependency "factory_bot", "~> 6.1"
   spec.add_development_dependency "simplecov", "~> 0.21.2"
   spec.add_development_dependency "simplecov-lcov", "~> 0.8.0"

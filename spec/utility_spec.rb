@@ -81,7 +81,7 @@ RSpec.describe ComputedModel::Model do
       it 'fails on nil field' do
         expect {
           User.list(raw_user_ids, with: [:token])
-        }.to raise_error(NoMethodError, "undefined method `token' for nil:NilClass")
+        }.to raise_error(NoMethodError, /undefined method `token' for nil/)
       end
     end
 

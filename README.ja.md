@@ -143,6 +143,41 @@ users = User.list([1, 2], with: [:title])
 users.map(&:title) # => ["Mr. ", "Dr. "]
 ```
 
+## Active Record 向けヘルパー（7.2+）
+
+ランタイム依存は Active Support のみです。Active Record が必要なオプション機能は **`ComputedModel::ActiveRecord`** にあります。`require "computed_model"` のあとに定数を参照すると autoload されます。明示する場合は次のとおりです。
+
+```ruby
+require "computed_model"
+require "computed_model/active_record"
+```
+
+主な API:
+
+- **`records_by_ids` / `records_by_ids_in_order`** — `WHERE id IN (...)` で一括取得。既定で **`strict_loading`** により、未プリロードの関連アクセスは `ActiveRecord::StrictLoadingViolationError` になります。ID が非常に多いときは **`chunk_size:`** でクエリを分割（SQLite のバインド上限など）。
+- **`preload_associations!`** — `ActiveRecord::Associations::Preloader`（`records:` キーワード）のラッパー。
+- **`ids_from_relation`** — Relation から安定して id を取得（`reorder(nil)` と `distinct.pluck`）。
+- **`bulk_load_and_compute_from_relation`** — Relation から id を取り、ラッパークラスの `bulk_load_and_compute` を呼ぶ。
+- **`index_rows_by`** — `define_loader` が返す「キー => レコード」用の `index_by` 相当。
+
+主ローダーの例:
+
+```ruby
+define_primary_loader :raw_user do |_subfields, ids:, **|
+  rows = ComputedModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
+  rows.map { |r| User.new(r) }
+end
+```
+
+ローダーでハッシュを返す例:
+
+```ruby
+define_loader :things, key: -> { id } do |ids, _subfields, **|
+  rows = Thing.where(user_id: ids)
+  ComputedModel::ActiveRecord.index_rows_by(rows, column: :user_id)
+end
+```
+
 ## 次に読むもの
 
 - [基本概念と機能](CONCEPTS.ja.md)
