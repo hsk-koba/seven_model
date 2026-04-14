@@ -4,12 +4,16 @@
 
 ## ラッパークラス
 
-ComputedModelは、ActiveRecordクラスなどに直接includeして使うことを(今のところ)想定していません。
+SevenModelは、ActiveRecordクラスなどに直接includeして使うことを(今のところ)想定していません。
 その場合ラッパークラスを作成し、元のクラスのオブジェクトは主ローダー (後述) として定義するのがよいでしょう。
+
+### Active Record との連携（7.2+）
+
+主ローダーや `define_loader` の中で Active Record を使う場合、**`SevenModel::ActiveRecord`**（利用時に Active Record を読み込むオプション機能）が利用できます。`strict_loading` 付きの一括取得、**ID リストのチャンク分割**、`Preloader` による関連の一括読み込み、`Relation` からの id 取得、`bulk_load_and_compute_from_relation` などがあります。概要とサンプルは [README.ja.md](README.ja.md) の **Active Record 向けヘルパー（7.2+）** を参照してください。
 
 ## フィールド
 
-**フィールド**はComputedModelの管理下にある属性のことで、依存管理の基本単位です。以下の3種類のフィールドがあります。
+**フィールド**はSevenModelの管理下にある属性のことで、依存管理の基本単位です。以下の3種類のフィールドがあります。
 
 - computed field (計算フィールド)
 - loaded field (読み込みフィールド)
@@ -62,7 +66,7 @@ end
 
 ## 計算タイミング
 
-ComputedModelの `bulk_load_and_compute` が呼ばれたタイミングで全ての必要なフィールドが計算されます。
+SevenModelの `bulk_load_and_compute` が呼ばれたタイミングで全ての必要なフィールドが計算されます。
 
 遅延ロードは今のところサポートしていません。
 
@@ -85,7 +89,7 @@ end
 
 ## `bulk_load_and_compute`
 
-ComputedModelの読み込みを行うメソッドが `bulk_load_and_compute` です。
+SevenModelの読み込みを行うメソッドが `bulk_load_and_compute` です。
 `bulk_load_and_compute` をそのまま使うのではなく、各モデルでラッパー関数を実装することが推奨されます。
 (これは後述するバッチロード引数の自由度が高く、そのままでは使い間違いが起きやすいからです)
 
@@ -262,7 +266,7 @@ dependency :profile, :preference
 computed def display_name; ...; end
 ```
 
-渡された配列は `ComputedModel.normalize_dependencies` によってハッシュに正規化されます。これは以下のようなルールになっています。
+渡された配列は `SevenModel.normalize_dependencies` によってハッシュに正規化されます。これは以下のようなルールになっています。
 
 - Symbolの場合はそのシンボルをキーとするHashとみなす。 (`:foo` → `{ foo: [true] }`)
 - Hashの場合は中の値を以下のように変換する。
@@ -289,16 +293,16 @@ computed def display_name; ...; end
 - `define_loader` や `define_primary_loader` のブロックに渡されるときは、下位フィールドセレクタに含まれる `nil`, `false`, `true` は
   取り除かれます。
 - いくつかの場面では `subfields.normalize` という特別なメソッドが使えることがあります。これは下位フィールドセレクタに含まれる
-  `nil`, `false`, `true` を取り除いたあと、 `ComputedModel.normalize_dependencies` の正規化にかけたハッシュを返します。
+  `nil`, `false`, `true` を取り除いたあと、 `SevenModel.normalize_dependencies` の正規化にかけたハッシュを返します。
 
 ## 継承
 
-ComputedModelで部分的にフィールドを定義したクラス (モジュール) を作り、それを継承 (インクルード) したクラスで定義を完成させることができます。
+SevenModelで部分的にフィールドを定義したクラス (モジュール) を作り、それを継承 (インクルード) したクラスで定義を完成させることができます。
 
 ```ruby
 module UserLikeConcern
   extends ActiveSupport::Concern
-  include ComputedModel::Model
+  include SevenModel::Model
 
   dependency :preference, :profile
   computed def display_name

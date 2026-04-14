@@ -2,19 +2,19 @@
 
 require 'active_support/concern'
 
-# A mixin for batch-loadable compound models. This is the main API of ComputedModel.
+# A mixin for batch-loadable compound models. This is the main API of SevenModel.
 #
-# See {ComputedModel::Model::ClassMethods} for methods you can use in the including classes.
+# See {SevenModel::Model::ClassMethods} for methods you can use in the including classes.
 #
 # @example
-#   require 'computed_model'
+#   require 'seven_model'
 #
 #   # Consider them external sources (ActiveRecord or resources obtained via HTTP)
 #   RawUser = Struct.new(:id, :name, :title)
 #   Preference = Struct.new(:user_id, :name_public)
 #
 #   class User
-#     include ComputedModel::Model
+#     include SevenModel::Model
 #
 #     attr_reader :id
 #     def initialize(raw_user)
@@ -73,13 +73,13 @@ require 'active_support/concern'
 #   users = User.list([1, 2], with: [:title])
 #   users.map(&:title) # => ["Mr. ", "Dr. "]
 
-module ComputedModel::Model
+module SevenModel::Model
   extend ActiveSupport::Concern
 
-  # A set of class methods for {ComputedModel::Model}. Automatically included to the
-  # singleton class when you include {ComputedModel::Model}.
+  # A set of class methods for {SevenModel::Model}. Automatically included to the
+  # singleton class when you include {SevenModel::Model}.
   #
-  # See {ComputedModel::Model} for examples.
+  # See {SevenModel::Model} for examples.
   module ClassMethods
     # Declares the dependency of a computed field.
     # Normally a call to this method will be followed by a call to {#computed} (or {#define_loader}).
@@ -120,8 +120,8 @@ module ComputedModel::Model
     #     # Use user ...
     #   end
     def dependency(*deps)
-      @__computed_model_next_dependency ||= []
-      @__computed_model_next_dependency.push(*deps)
+      @__seven_model_next_dependency ||= []
+      @__seven_model_next_dependency.push(*deps)
     end
 
     # Declares a computed field. Normally it follows a call to {#dependency}.
@@ -140,22 +140,22 @@ module ComputedModel::Model
       meth_name_orig = :"#{meth_name}_orig"
       compute_meth_name = :"compute_#{meth_name}"
 
-      __computed_model_graph << ComputedModel::DepGraph::Node.new(:computed, meth_name, @__computed_model_next_dependency)
-      remove_instance_variable(:@__computed_model_next_dependency) if defined?(@__computed_model_next_dependency)
+      __seven_model_graph << SevenModel::DepGraph::Node.new(:computed, meth_name, @__seven_model_next_dependency)
+      remove_instance_variable(:@__seven_model_next_dependency) if defined?(@__seven_model_next_dependency)
 
       alias_method meth_name_orig, meth_name
       define_method(meth_name) do
-        raise ComputedModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
+        raise SevenModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
 
-        __computed_model_check_availability(meth_name)
+        __seven_model_check_availability(meth_name)
         instance_variable_get(var_name)
       end
       define_method(compute_meth_name) do
-        @__computed_model_stack << @__computed_model_plan[meth_name]
+        @__seven_model_stack << @__seven_model_plan[meth_name]
         begin
           instance_variable_set(var_name, send(meth_name_orig))
         ensure
-          @__computed_model_stack.pop
+          @__seven_model_stack.pop
         end
       end
       if public_method_defined?(meth_name_orig)
@@ -241,11 +241,11 @@ module ComputedModel::Model
       raise ArgumentError, "No block given" unless block
 
       var_name = :"@#{meth_name}"
-      loader_name = :"__computed_model_load_#{meth_name}"
+      loader_name = :"__seven_model_load_#{meth_name}"
       writer_name = :"#{meth_name}="
 
-      __computed_model_graph << ComputedModel::DepGraph::Node.new(:loaded, meth_name, @__computed_model_next_dependency)
-      remove_instance_variable(:@__computed_model_next_dependency) if defined?(@__computed_model_next_dependency)
+      __seven_model_graph << SevenModel::DepGraph::Node.new(:loaded, meth_name, @__seven_model_next_dependency)
+      remove_instance_variable(:@__seven_model_next_dependency) if defined?(@__seven_model_next_dependency)
       define_singleton_method(loader_name) do |objs, subfields, **options|
         keys = objs.map { |o| o.instance_exec(&key) }
         field_values = block.call(keys, subfields, **options)
@@ -255,9 +255,9 @@ module ComputedModel::Model
       end
 
       define_method(meth_name) do
-        raise ComputedModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
+        raise SevenModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
 
-        __computed_model_check_availability(meth_name)
+        __seven_model_check_availability(meth_name)
         instance_variable_get(var_name)
       end
       # TODO: remove writer?
@@ -265,7 +265,7 @@ module ComputedModel::Model
     end
 
     # Declares a primary field. See {#define_loader} and {#dependency} too.
-    # ComputedModel should have exactly one primary field.
+    # SevenModel should have exactly one primary field.
     #
     # `define_primary_loader :foo do ... end` generates a reader `foo` and
     # a writer `foo=`.
@@ -293,7 +293,7 @@ module ComputedModel::Model
     #
     # @example define a primary loader for ActiveRecord-based models
     #   class User
-    #     include ComputedModel::Model
+    #     include SevenModel::Model
     #
     #     def initialize(raw_user)
     #       # @raw_user must match the name of the primary loader
@@ -305,28 +305,30 @@ module ComputedModel::Model
     #       # Create User instances
     #       raw_users.map { |raw_user| User.new(raw_user) }
     #     end
+    #
+    #     # With Active Record 7.2+, see also {SevenModel::ActiveRecord.records_by_ids_in_order}.
     #   end
     def define_primary_loader(meth_name, &block)
       # TODO: The current API requires the user to initialize a specific instance variable.
       # TODO: this design is a bit ugly.
-      if defined?(@__computed_model_next_dependency)
-        remove_instance_variable(:@__computed_model_next_dependency)
+      if defined?(@__seven_model_next_dependency)
+        remove_instance_variable(:@__seven_model_next_dependency)
         raise ArgumentError, 'primary field cannot have a dependency'
       end
       raise ArgumentError, "No block given" unless block
 
       var_name = :"@#{meth_name}"
-      loader_name = :"__computed_model_enumerate_#{meth_name}"
+      loader_name = :"__seven_model_enumerate_#{meth_name}"
 
-      __computed_model_graph << ComputedModel::DepGraph::Node.new(:primary, meth_name, {})
+      __seven_model_graph << SevenModel::DepGraph::Node.new(:primary, meth_name, {})
       define_singleton_method(loader_name) do |subfields, **options|
         block.call(subfields, **options)
       end
 
       define_method(meth_name) do
-        raise ComputedModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
+        raise SevenModel::NotLoaded, "the field #{meth_name} is not loaded" unless instance_variable_defined?(var_name)
 
-        __computed_model_check_availability(meth_name)
+        __seven_model_check_availability(meth_name)
         instance_variable_get(var_name)
       end
       # TODO: remove writer?
@@ -338,38 +340,38 @@ module ComputedModel::Model
     # Each model class is expected to provide its own wrapper of this method. See CONCEPTS.md for examples.
     #
     # @param deps [Array<Symbol, Hash{Symbol=>Array, Object}>] dependency list. Same format as {#dependency}.
-    #   See {ComputedModel.normalize_dependencies} too.
+    #   See {SevenModel.normalize_dependencies} too.
     # @param options [Hash] the batch-loading parameters.
     #   Passed down as-is to loaders ({#define_loader}) and the primary loader ({#define_primary_loader}).
     # @return [Array<Object>] The array of record objects, with requested fields filled in.
-    # @raise [ComputedModel::CyclicDependency] if the graph has a cycle
+    # @raise [SevenModel::CyclicDependency] if the graph has a cycle
     # @raise [ArgumentError] if the graph lacks a primary field
     # @raise [RuntimeError] if the graph has multiple primary fields
     # @raise [RuntimeError] if the graph has a dangling dependency (reference to an undefined field)
     def bulk_load_and_compute(deps, **options)
       objs = nil
-      sorted = __computed_model_sorted_graph
+      sorted = __seven_model_sorted_graph
       plan = sorted.plan(deps)
       plan.load_order.each do |node|
         case sorted.original[node.name].type
         when :primary
-          loader_name = :"__computed_model_enumerate_#{node.name}"
-          objs = send(loader_name, ComputedModel.filter_subfields(node.subfields), **options)
-          dummy_toplevel_node = ComputedModel::Plan::Node.new(nil, plan.toplevel, nil)
+          loader_name = :"__seven_model_enumerate_#{node.name}"
+          objs = send(loader_name, SevenModel.filter_subfields(node.subfields), **options)
+          dummy_toplevel_node = SevenModel::Plan::Node.new(nil, plan.toplevel, nil)
           objs.each do |obj|
-            obj.instance_variable_set(:@__computed_model_plan, plan)
-            obj.instance_variable_set(:@__computed_model_stack, [dummy_toplevel_node])
+            obj.instance_variable_set(:@__seven_model_plan, plan)
+            obj.instance_variable_set(:@__seven_model_stack, [dummy_toplevel_node])
           end
         when :loaded
-          loader_name = :"__computed_model_load_#{node.name}"
+          loader_name = :"__seven_model_load_#{node.name}"
           objs.each do |obj|
-            obj.instance_variable_get(:@__computed_model_stack) << node
+            obj.instance_variable_get(:@__seven_model_stack) << node
           end
           begin
-            send(loader_name, objs, ComputedModel.filter_subfields(node.subfields), **options)
+            send(loader_name, objs, SevenModel.filter_subfields(node.subfields), **options)
           ensure
             objs.each do |obj|
-              obj.instance_variable_get(:@__computed_model_stack).pop
+              obj.instance_variable_get(:@__seven_model_stack).pop
             end
           end
         else # when :computed
@@ -388,7 +390,7 @@ module ComputedModel::Model
     # Place it after all the relevant declarations. Otherwise a mysterious bug may occur.
     #
     # @return [void]
-    # @raise [ComputedModel::CyclicDependency] if the graph has a cycle
+    # @raise [SevenModel::CyclicDependency] if the graph has a cycle
     # @raise [ArgumentError] if the graph lacks a primary field
     # @raise [RuntimeError] if the graph has multiple primary fields
     # @raise [RuntimeError] if the graph has a dangling dependency (reference to an undefined field)
@@ -403,24 +405,24 @@ module ComputedModel::Model
     #     verify_dependencies
     #   end
     def verify_dependencies
-      __computed_model_sorted_graph
+      __seven_model_sorted_graph
       nil
     end
 
-    # @return [ComputedModel::DepGraph::Sorted]
-    private def __computed_model_sorted_graph
-      @__computed_model_sorted_graph ||= __computed_model_merged_graph.tsort
+    # @return [SevenModel::DepGraph::Sorted]
+    private def __seven_model_sorted_graph
+      @__seven_model_sorted_graph ||= __seven_model_merged_graph.tsort
     end
 
-    # @return [ComputedModel::DepGraph]
-    private def __computed_model_merged_graph
-      graphs = ancestors.reverse.map { |m| m.respond_to?(:__computed_model_graph, true) ? m.send(:__computed_model_graph) : nil }.compact
-      ComputedModel::DepGraph.merge(graphs)
+    # @return [SevenModel::DepGraph]
+    private def __seven_model_merged_graph
+      graphs = ancestors.reverse.map { |m| m.respond_to?(:__seven_model_graph, true) ? m.send(:__seven_model_graph) : nil }.compact
+      SevenModel::DepGraph.merge(graphs)
     end
 
-    # @return [ComputedModel::DepGraph]
-    private def __computed_model_graph
-      @__computed_model_graph ||= ComputedModel::DepGraph.new
+    # @return [SevenModel::DepGraph]
+    private def __seven_model_graph
+      @__seven_model_graph ||= SevenModel::DepGraph.new
     end
   end
 
@@ -428,20 +430,20 @@ module ComputedModel::Model
   # or the toplevel dependency if called outside of computed fields.
   # @return [Set<Symbol>]
   def current_deps
-    @__computed_model_stack.last.deps
+    @__seven_model_stack.last.deps
   end
 
   # Returns subfield selectors passed to the currently computing field,
   # or nil if called outside of computed fields.
-  # @return [ComputedModel::NormalizableArray, nil]
+  # @return [SevenModel::NormalizableArray, nil]
   def current_subfields
-    @__computed_model_stack.last.subfields
+    @__seven_model_stack.last.subfields
   end
 
   # @param name [Symbol]
-  private def __computed_model_check_availability(name)
-    return if @__computed_model_stack.last.deps.include?(name)
+  private def __seven_model_check_availability(name)
+    return if @__seven_model_stack.last.deps.include?(name)
 
-    raise ComputedModel::ForbiddenDependency, "Not a direct dependency: #{name}"
+    raise SevenModel::ForbiddenDependency, "Not a direct dependency: #{name}"
   end
 end

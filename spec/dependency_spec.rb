@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'support/models/raw_user'
 require 'support/models/raw_book'
 
-RSpec.describe ComputedModel do
+RSpec.describe SevenModel do
   let!(:raw_user1) { create(:raw_user, name: "User One") }
   let!(:raw_user2) { create(:raw_user, name: "User Two") }
   let!(:raw_user3) { create(:raw_user, name: "User Three") }
@@ -17,7 +17,7 @@ RSpec.describe ComputedModel do
       def self.name; "User"; end
       def self.to_s; "User"; end
 
-      include ComputedModel::Model
+      include SevenModel::Model
 
       attr_reader :id
 
@@ -74,7 +74,7 @@ RSpec.describe ComputedModel do
     end
     it "raises NotLoaded" do
       u = user_class.list(raw_user_ids, with: [:raw_user]).first
-      expect { u.raw_user }.to raise_error(ComputedModel::NotLoaded, 'the field raw_user is not loaded')
+      expect { u.raw_user }.to raise_error(SevenModel::NotLoaded, 'the field raw_user is not loaded')
     end
   end
 
@@ -153,7 +153,7 @@ RSpec.describe ComputedModel do
       it "raises an error" do
         expect {
           user_class.list(raw_user_ids, with: [:name])
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #fancy_name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #fancy_name")
       end
     end
 
@@ -161,7 +161,7 @@ RSpec.describe ComputedModel do
       it "raises an error" do
         expect {
           user_class.list(raw_user_ids, with: [])
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #fancy_name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #fancy_name")
       end
     end
 
@@ -171,7 +171,7 @@ RSpec.describe ComputedModel do
           user_class.module_eval do
             verify_dependencies
           end
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #fancy_name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #fancy_name")
       end
     end
   end
@@ -190,7 +190,7 @@ RSpec.describe ComputedModel do
       it "raises an error" do
         expect {
           user_class.list(raw_user_ids, with: [:name])
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #name")
       end
     end
 
@@ -198,7 +198,7 @@ RSpec.describe ComputedModel do
       it "raises an error" do
         expect {
           user_class.list(raw_user_ids, with: [])
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #name")
       end
     end
 
@@ -208,7 +208,7 @@ RSpec.describe ComputedModel do
           user_class.module_eval do
             verify_dependencies
           end
-        }.to raise_error(ComputedModel::CyclicDependency, "Cyclic dependency for #name")
+        }.to raise_error(SevenModel::CyclicDependency, "Cyclic dependency for #name")
       end
     end
   end
@@ -459,7 +459,7 @@ RSpec.describe ComputedModel do
         def self.name; "User"; end
         def self.to_s; "User"; end
 
-        include ComputedModel::Model
+        include SevenModel::Model
 
         attr_reader :id
 
@@ -503,7 +503,7 @@ RSpec.describe ComputedModel do
     it "raises an error" do
       expect {
         Class.new do
-          include ComputedModel::Model
+          include SevenModel::Model
           dependency :foo
           define_primary_loader(:bar) {}
         end

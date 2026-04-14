@@ -1,44 +1,46 @@
 ## Unreleased
 
+- Added optional **`SevenModel::ActiveRecord`** helpers for Active Record 7.2+: `records_by_ids` / `records_by_ids_in_order` now accept **`chunk_size:`** for large `IN` lists, plus **`index_rows_by`** for loader hash keys. Documented in README / CONCEPTS (EN/JA).
+
 ## 0.3.0
 
-computed_model 0.3 comes with a great number of improvements, and a bunch of breaking changes.
+seven_model 0.3 comes with a great number of improvements, and a bunch of breaking changes.
 
 - Breaking changes
-  - `include ComputedModel` is now `include ComputedModel::Model`.
+  - `include SevenModel` is now `include SevenModel::Model`.
   - Indirect dependencies are now rejected.
-  - `computed_model_error` was removed.
+  - `seven_model_error` was removed.
   - `dependency` before `define_loader` will be consumed and ignored.
   - `dependency` before `define_primary_loader` will be an error.
   - Cyclic dependency is an error even if it is unused.
   - `nil`, `true`, and `false` in subdeps will be filtered out before passed to a loader.
-  - `ComputedModel.normalized_dependencies` now returns `[true]` instead of `[]` as an empty value.
+  - `SevenModel.normalized_dependencies` now returns `[true]` instead of `[]` as an empty value.
   - `include_subdeps` is now `include_subfields`
 - Notable behavioral changes
   - The order in which fields are loaded is changed.
-  - `ComputedModel::Model` now uses `ActiveSupport::Concern`.
+  - `SevenModel::Model` now uses `ActiveSupport::Concern`.
 - Changed
-  - Separate `ComputedModel::Model` from `ComputedModel` https://github.com/wantedly/computed_model/pull/17
-  - Remove `computed_model_error` https://github.com/wantedly/computed_model/pull/18
-  - Improve behavior around dependency-field pairing https://github.com/wantedly/computed_model/pull/20
-  - Implement strict field access https://github.com/wantedly/computed_model/pull/23
-  - Preprocess graph with topological sorting https://github.com/wantedly/computed_model/pull/24
-  - Implement conditional dependencies and subdependency mapping/passthrough https://github.com/wantedly/computed_model/pull/25
-  - Use `ActiveSupport::Concern` https://github.com/wantedly/computed_model/pull/26
-  - Rename subdeps as subfields https://github.com/wantedly/computed_model/pull/31
+  - Separate `SevenModel::Model` from `SevenModel` https://github.com/wantedly/seven_model/pull/17
+  - Remove `seven_model_error` https://github.com/wantedly/seven_model/pull/18
+  - Improve behavior around dependency-field pairing https://github.com/wantedly/seven_model/pull/20
+  - Implement strict field access https://github.com/wantedly/seven_model/pull/23
+  - Preprocess graph with topological sorting https://github.com/wantedly/seven_model/pull/24
+  - Implement conditional dependencies and subdependency mapping/passthrough https://github.com/wantedly/seven_model/pull/25
+  - Use `ActiveSupport::Concern` https://github.com/wantedly/seven_model/pull/26
+  - Rename subdeps as subfields https://github.com/wantedly/seven_model/pull/31
 - Added
-  - `ComputedModel::Model#verify_dependencies`
-  - Loader dependency https://github.com/wantedly/computed_model/pull/28
-  - Support computed model inheritance https://github.com/wantedly/computed_model/pull/29
+  - `SevenModel::Model#verify_dependencies`
+  - Loader dependency https://github.com/wantedly/seven_model/pull/28
+  - Support computed model inheritance https://github.com/wantedly/seven_model/pull/29
 - Refactored
-  - Extract `DepGraph` from `Model` https://github.com/wantedly/computed_model/pull/19
-  - Define loader as a singleton method https://github.com/wantedly/computed_model/pull/21
-  - Refactor `ComputedModel::Plan` https://github.com/wantedly/computed_model/pull/22
+  - Extract `DepGraph` from `Model` https://github.com/wantedly/seven_model/pull/19
+  - Define loader as a singleton method https://github.com/wantedly/seven_model/pull/21
+  - Refactor `SevenModel::Plan` https://github.com/wantedly/seven_model/pull/22
 - Misc
-  - Collect coverage https://github.com/wantedly/computed_model/pull/12 https://github.com/wantedly/computed_model/pull/16
-  - Refactor tests https://github.com/wantedly/computed_model/pull/10 https://github.com/wantedly/computed_model/pull/15
-  - Add tests https://github.com/wantedly/computed_model/pull/27
-  - Add documentation https://github.com/wantedly/computed_model/pull/30
+  - Collect coverage https://github.com/wantedly/seven_model/pull/12 https://github.com/wantedly/seven_model/pull/16
+  - Refactor tests https://github.com/wantedly/seven_model/pull/10 https://github.com/wantedly/seven_model/pull/15
+  - Add tests https://github.com/wantedly/seven_model/pull/27
+  - Add documentation https://github.com/wantedly/seven_model/pull/30
 
 See [Migration-0.3.md](Migration-0.3.md) for migration.
 
@@ -84,7 +86,7 @@ Now you can reuse computed model definitions via inheritance.
 ```ruby
 module UserLikeConcern
   extends ActiveSupport::Concern
-  include ComputedModel::Model
+  include SevenModel::Model
 
   dependency :preference, :profile
   computed def display_name
@@ -109,7 +111,7 @@ end
 
 ## 0.2.2
 
-- [#7](https://github.com/wantedly/computed_model/pull/7) Accept Hash as a `with` parameter
+- [#7](https://github.com/wantedly/seven_model/pull/7) Accept Hash as a `with` parameter
 
 ## 0.2.1
 
@@ -124,7 +126,7 @@ end
 ## 0.1.1
 
 - Expand docs.
-- Add `ComputedModel#computed_model_error` for load cancellation
+- Add `SevenModel#seven_model_error` for load cancellation
 
 ## 0.1.0
 
