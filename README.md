@@ -1,6 +1,6 @@
-# ComputedModel
+# SevenModel
 
-ComputedModel is a universal batch loader which comes with a dependency-resolution algorithm.
+SevenModel is a universal batch loader which comes with a dependency-resolution algorithm.
 
 - Thanks to the dependency resolution, it allows you to the following trifecta at once, without breaking abstraction.
   - Process information gathered from datasources (such as ActiveRecord) and return the derived one.
@@ -11,6 +11,24 @@ ComputedModel is a universal batch loader which comes with a dependency-resoluti
   For example, you can gather data from both HTTP and ActiveRecord and return the derived one.
 
 [日本語版README](README.ja.md)
+
+## Why the rename?
+
+SevenModel is the new name of ComputedModel. The project now targets **Rails 7+** as its baseline, and the new name makes that support policy explicit.
+
+## Migration from ComputedModel
+
+```ruby
+# old
+require "computed_model"
+include ComputedModel::Model
+
+# new
+require "seven_model"
+include SevenModel::Model
+```
+
+`ComputedModel` remains available as a compatibility alias in this release.
 
 ## Problems to solve
 
@@ -64,7 +82,7 @@ end
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'computed_model', '~> 0.3.0'
+gem 'seven_model', '~> 0.3.0'
 ```
 
 And then execute:
@@ -73,19 +91,19 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install computed_model
+    $ gem install seven_model
 
 ## Working example
 
 ```ruby
-require 'computed_model'
+require 'seven_model'
 
 # Consider them external sources (ActiveRecord or resources obtained via HTTP)
 RawUser = Struct.new(:id, :name, :title)
 Preference = Struct.new(:user_id, :name_public)
 
 class User
-  include ComputedModel::Model
+  include SevenModel::Model
 
   attr_reader :id
   def initialize(raw_user)
@@ -147,11 +165,11 @@ users.map(&:title) # => ["Mr. ", "Dr. "]
 
 ## Active Record helpers (7.2+)
 
-This gem depends on Active Support only at runtime. Optional helpers that **require Active Record** live under `ComputedModel::ActiveRecord`. They autoload when you reference the constant (after `require "computed_model"`), or you can load explicitly:
+This gem depends on Active Support only at runtime. Optional helpers that **require Active Record** live under `SevenModel::ActiveRecord`. They autoload when you reference the constant (after `require "seven_model"`), or you can load explicitly:
 
 ```ruby
-require "computed_model"
-require "computed_model/active_record"
+require "seven_model"
+require "seven_model/active_record"
 ```
 
 Highlights:
@@ -166,7 +184,7 @@ Example primary loader:
 
 ```ruby
 define_primary_loader :raw_user do |_subfields, ids:, **|
-  rows = ComputedModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
+  rows = SevenModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
   rows.map { |r| User.new(r) }
 end
 ```
@@ -176,7 +194,7 @@ Example loader returning a hash keyed by id:
 ```ruby
 define_loader :things, key: -> { id } do |ids, _subfields, **|
   rows = Thing.where(user_id: ids)
-  ComputedModel::ActiveRecord.index_rows_by(rows, column: :user_id)
+  SevenModel::ActiveRecord.index_rows_by(rows, column: :user_id)
 end
 ```
 
@@ -202,4 +220,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/wantedly/computed_model.
+Bug reports and pull requests are welcome on GitHub at https://github.com/wantedly/seven_model.

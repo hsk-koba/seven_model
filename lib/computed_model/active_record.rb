@@ -2,13 +2,13 @@
 
 require "active_record"
 
-module ComputedModel
-  # Helpers for using {ComputedModel::Model} alongside ActiveRecord 7.2+.
+module SevenModel
+  # Helpers for using {SevenModel::Model} alongside ActiveRecord 7.2+.
   #
   # This file is optional: it +require+s Active Record. Load it when you use AR in loaders:
   #
-  #   require "computed_model"
-  #   require "computed_model/active_record"
+  #   require "seven_model"
+  #   require "seven_model/active_record"
   #
   module ActiveRecord
     class << self
@@ -96,23 +96,23 @@ module ComputedModel
         rel.distinct.pluck(id_column)
       end
 
-      # Runs {ComputedModel::Model::ClassMethods#bulk_load_and_compute} using ids taken from a relation.
+      # Runs {SevenModel::Model::ClassMethods#bulk_load_and_compute} using ids taken from a relation.
       #
       # Typical wrapper on the computed model:
       #
       #   def self.from_users_scope(scope, with:)
-      #     ComputedModel::ActiveRecord.bulk_load_and_compute_from_relation(scope, self, with: with)
+      #     SevenModel::ActiveRecord.bulk_load_and_compute_from_relation(scope, self, with: with)
       #   end
       #
       # @param relation [ActiveRecord::Relation]
-      # @param computed_model_class [Class] class including {ComputedModel::Model}
+      # @param seven_model_class [Class] class including {SevenModel::Model}
       # @param with [Array, Symbol] dependency list passed to +bulk_load_and_compute+
       # @param id_column [Symbol] column plucked from +relation+
       # @param options [Hash] merged into +bulk_load_and_compute+ after +:ids+ (e.g. loader-specific keywords)
       # @return [Array] whatever +bulk_load_and_compute+ returns
-      def bulk_load_and_compute_from_relation(relation, computed_model_class, with:, id_column: :id, **options)
+      def bulk_load_and_compute_from_relation(relation, seven_model_class, with:, id_column: :id, **options)
         ids = options.delete(:ids) || ids_from_relation(relation, id_column: id_column)
-        computed_model_class.bulk_load_and_compute(Array(with), **options, ids: ids)
+        seven_model_class.bulk_load_and_compute(Array(with), **options, ids: ids)
       end
 
       private

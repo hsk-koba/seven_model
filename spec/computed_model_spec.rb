@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'support/models/raw_user'
 require 'support/models/raw_book'
 
-RSpec.describe ComputedModel do
+RSpec.describe SevenModel do
   let!(:raw_user1) { create(:raw_user, name: "User One") }
   let!(:raw_user2) { create(:raw_user, name: "User Two") }
   let!(:raw_user3) { create(:raw_user, name: "User Three") }
@@ -19,7 +19,7 @@ RSpec.describe ComputedModel do
 
   class self::Sandbox
     class User
-      include ComputedModel::Model
+      include SevenModel::Model
 
       attr_reader :id
 
@@ -54,7 +54,7 @@ RSpec.describe ComputedModel do
     end
 
     class Book
-      include ComputedModel::Model
+      include SevenModel::Model
 
       attr_reader :id, :author_id
 
@@ -86,13 +86,13 @@ RSpec.describe ComputedModel do
     it "doesn't fetch name" do
       expect {
         users[0].name
-      }.to raise_error(ComputedModel::NotLoaded, "the field name is not loaded")
+      }.to raise_error(SevenModel::NotLoaded, "the field name is not loaded")
     end
 
     it "doesn't fetch books" do
       expect {
         users[0].books
-      }.to raise_error(ComputedModel::NotLoaded, "the field books is not loaded")
+      }.to raise_error(SevenModel::NotLoaded, "the field books is not loaded")
     end
   end
 
@@ -102,7 +102,7 @@ RSpec.describe ComputedModel do
       expect(users.size).to eq(3)
       expect {
         users[0].raw_user
-      }.to raise_error(ComputedModel::ForbiddenDependency, 'Not a direct dependency: raw_user')
+      }.to raise_error(SevenModel::ForbiddenDependency, 'Not a direct dependency: raw_user')
     end
 
     it "fetches name" do
@@ -113,7 +113,7 @@ RSpec.describe ComputedModel do
     it "doesn't fetch fancy_name" do
       expect {
         users[0].fancy_name
-      }.to raise_error(ComputedModel::NotLoaded, "the field fancy_name is not loaded")
+      }.to raise_error(SevenModel::NotLoaded, "the field fancy_name is not loaded")
     end
   end
 
@@ -123,14 +123,14 @@ RSpec.describe ComputedModel do
       expect(users.size).to eq(3)
       expect {
         users[0].raw_user
-      }.to raise_error(ComputedModel::ForbiddenDependency, 'Not a direct dependency: raw_user')
+      }.to raise_error(SevenModel::ForbiddenDependency, 'Not a direct dependency: raw_user')
     end
 
     it "doesn't allow accessing name" do
       expect(users.size).to eq(3)
       expect {
         users[0].name
-      }.to raise_error(ComputedModel::ForbiddenDependency, 'Not a direct dependency: name')
+      }.to raise_error(SevenModel::ForbiddenDependency, 'Not a direct dependency: name')
     end
 
     it "fetches fancy_name" do

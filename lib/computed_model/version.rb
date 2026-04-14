@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "seven_model/version"
+
 module ComputedModel
-  VERSION = "0.3.0"
+  VERSION = SevenModel::VERSION unless const_defined?(:VERSION)
 end

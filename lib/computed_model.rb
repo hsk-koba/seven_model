@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "computed_model/version"
-require "computed_model/plan"
-require "computed_model/dep_graph"
-require "computed_model/model"
+require "seven_model/version"
+require "seven_model/plan"
+require "seven_model/dep_graph"
+require "seven_model/model"
 
-# ComputedModel is a universal batch loader which comes with a dependency-resolution algorithm.
+# SevenModel is a universal batch loader which comes with a dependency-resolution algorithm.
 #
 # - Thanks to the dependency resolution, it allows you to the following trifecta at once, without breaking abstraction.
 #   - Process information gathered from datasources (such as ActiveRecord) and return the derived one.
@@ -15,9 +15,9 @@ require "computed_model/model"
 # - Designed to be universal and datasource-independent.
 #   For example, you can gather data from both HTTP and ActiveRecord and return the derived one.
 #
-# See {ComputedModel::Model} for basic usage.
-module ComputedModel
-  autoload :ActiveRecord, "computed_model/active_record"
+# See {SevenModel::Model} for basic usage.
+module SevenModel
+  autoload :ActiveRecord, "seven_model/active_record"
 
   # An error raised when you tried to read from a loaded/computed attribute,
   # but that attribute isn't loaded by the batch loader.
@@ -33,22 +33,22 @@ module ComputedModel
   # Normalizes dependency list as a hash.
   #
   # Normally you don't need to call it directly.
-  # {ComputedModel::Model::ClassMethods#dependency}, {ComputedModel::Model::ClassMethods#bulk_load_and_compute}, and
-  # {ComputedModel::NormalizableArray#normalized} will internally use this function.
+  # {SevenModel::Model::ClassMethods#dependency}, {SevenModel::Model::ClassMethods#bulk_load_and_compute}, and
+  # {SevenModel::NormalizableArray#normalized} will internally use this function.
   #
   # @param deps [Array<(Symbol, Hash)>, Hash, Symbol] dependency list
   # @return [Hash{Symbol=>Array}] normalized dependency hash
   # @raise [RuntimeError] if the dependency list contains values other than Symbol or Hash
   # @example
-  #   ComputedModel.normalize_dependencies([:foo, :bar])
+  #   SevenModel.normalize_dependencies([:foo, :bar])
   #   # => { foo: [true], bar: [true] }
   #
   # @example
-  #   ComputedModel.normalize_dependencies([:foo, bar: :baz])
+  #   SevenModel.normalize_dependencies([:foo, bar: :baz])
   #   # => { foo: [true], bar: [true, :baz] }
   #
   # @example
-  #   ComputedModel.normalize_dependencies(foo: -> (subfields) { true })
+  #   SevenModel.normalize_dependencies(foo: -> (subfields) { true })
   #   # => { foo: [#<Proc:...>] }
   def self.normalize_dependencies(deps)
     normalized = {}
@@ -73,14 +73,14 @@ module ComputedModel
   # Removes `nil`, `true` and `false` from the given array.
   #
   # Normally you don't need to call it directly.
-  # {ComputedModel::Model::ClassMethods#define_loader},
-  # {ComputedModel::Model::ClassMethods#define_primary_loader}, and
-  # {ComputedModel::NormalizableArray#normalized} will internally use this function.
+  # {SevenModel::Model::ClassMethods#define_loader},
+  # {SevenModel::Model::ClassMethods#define_primary_loader}, and
+  # {SevenModel::NormalizableArray#normalized} will internally use this function.
   #
   # @param subfields [Array] subfield selector list
   # @return [Array] the filtered one
   # @example
-  #   ComputedModel.filter_subfields([false, {}, true, nil, { foo: :bar }])
+  #   SevenModel.filter_subfields([false, {}, true, nil, { foo: :bar }])
   #   # => [{}, { foo: :bar }]
   def self.filter_subfields(subfields)
     subfields.select { |x| x && x != true }
@@ -90,15 +90,18 @@ module ComputedModel
   #
   # You don't need to directly use it.
   #
-  # - {ComputedModel::Model#current_subfields} returns NormalizableArray.
-  # - Procs passed to {ComputedModel::Model::ClassMethods#dependency} will receive NormalizeArray.
+  # - {SevenModel::Model#current_subfields} returns NormalizableArray.
+  # - Procs passed to {SevenModel::Model::ClassMethods#dependency} will receive NormalizeArray.
   class NormalizableArray < Array
     # Returns the normalized hash of the dependencies.
     # @return [Hash{Symbol=>Array}] the normalized hash of the dependencies
     # @raise [RuntimeError] if the list isn't valid as a dependency list.
-    #   See {ComputedModel.normalize_dependencies} for details.
+    #   See {SevenModel.normalize_dependencies} for details.
     def normalized
-      @normalized ||= ComputedModel.normalize_dependencies(ComputedModel.filter_subfields(self))
+      @normalized ||= SevenModel.normalize_dependencies(SevenModel.filter_subfields(self))
     end
   end
 end
+
+
+ComputedModel = SevenModel unless defined?(ComputedModel)

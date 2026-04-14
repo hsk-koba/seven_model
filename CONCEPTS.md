@@ -4,17 +4,17 @@
 
 ## Wrapping classes
 
-We don't (yet) support directly including `ComputedModel::Model` into ActiveRecord classes or similar ones.
+We don't (yet) support directly including `SevenModel::Model` into ActiveRecord classes or similar ones.
 In that case, we recommend creating a wrapper class and reference the original class via the primary loader
 (described later).
 
 ### Active Record integration (7.2+)
 
-For wrapper primary loaders and `define_loader` blocks backed by Active Record, see **`ComputedModel::ActiveRecord`** (optional: loads Active Record when used). It provides batch loading with **`strict_loading`**, optional **chunked `IN` lists**, **`ActiveRecord::Associations::Preloader`**, helpers to pluck ids from a **`Relation`**, and **`bulk_load_and_compute_from_relation`**. Details and examples are in [README.md](README.md) (section **Active Record helpers (7.2+)**).
+For wrapper primary loaders and `define_loader` blocks backed by Active Record, see **`SevenModel::ActiveRecord`** (optional: loads Active Record when used). It provides batch loading with **`strict_loading`**, optional **chunked `IN` lists**, **`ActiveRecord::Associations::Preloader`**, helpers to pluck ids from a **`Relation`**, and **`bulk_load_and_compute_from_relation`**. Details and examples are in [README.md](README.md) (section **Active Record helpers (7.2+)**).
 
 ## Fields
 
-**Field** are certain attributes managed by ComputedModel. It's a unit of dependency resolution and
+**Field** are certain attributes managed by SevenModel. It's a unit of dependency resolution and
 there are three kinds of fields:
 
 - computed fields
@@ -72,7 +72,7 @@ end
 
 ## When computation is done
 
-All necessary fields are computed eagerly when ComputedModel's `bulk_load_and_compute` is called.
+All necessary fields are computed eagerly when SevenModel's `bulk_load_and_compute` is called.
 
 It doesn't (yet) provide lazy loading functionality.
 
@@ -95,7 +95,7 @@ You cannot read other fields even if it happens to be present (such as indirect 
 
 ## `bulk_load_and_compute`
 
-`bulk_load_and_compute` is the very method you need to load ComputedModel records.
+`bulk_load_and_compute` is the very method you need to load SevenModel records.
 We recommend wrapping the method in each model class.
 This is mostly because there is a lot of freedom in the format of the batch-loading parameters (described later)
 and it will likely cause mistakes if used directly.
@@ -274,7 +274,7 @@ dependency :profile, :preference
 computed def display_name; ...; end
 ```
 
-The resulting array will be normalized as a hash by `ComputedModel.normalize_dependencies`. The rules are:
+The resulting array will be normalized as a hash by `SevenModel.normalize_dependencies`. The rules are:
 
 - If it's a Symbol, convert it to a singleton hash containing the key. (`:foo` → `{ foo: [true] }`)
 - If it's a Hash, convert the values as follows:
@@ -299,16 +299,16 @@ Each subfield selector is interpreted as below:
 For that reason, in most cases subfield selectors contain `true`. As a special case we remove them in the following cases:
 
 - We'll remove `nil`, `false`, `true` from the subfield selectors before passed to a `define_loader` or `define_primary_loader` block.
-- In certain cases you can use `subfields.normalize` to get a hash from the subfield selectors array. This is basically `ComputedModel.normalize_dependencies` but `nil`, `false`, `true` will be removed as part of preprocessing.
+- In certain cases you can use `subfields.normalize` to get a hash from the subfield selectors array. This is basically `SevenModel.normalize_dependencies` but `nil`, `false`, `true` will be removed as part of preprocessing.
 
 ## Inheritance
 
-You can also define partial ComputedModel class/module. You can then inherit/include it in a different class and complete the definition.
+You can also define partial SevenModel class/module. You can then inherit/include it in a different class and complete the definition.
 
 ```ruby
 module UserLikeConcern
   extends ActiveSupport::Concern
-  include ComputedModel::Model
+  include SevenModel::Model
 
   dependency :preference, :profile
   computed def display_name

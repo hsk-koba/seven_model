@@ -8,7 +8,7 @@ require 'factory_bot'
 SimpleCov.start do
   load_profile "test_frameworks"
   track_files "lib/**/*.rb"
-  add_filter "lib/computed_model/version.rb"
+  add_filter "lib/seven_model/version.rb"
   if ENV['CI'] == 'true'
     SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
     SimpleCov::Formatter::LcovFormatter.config.single_report_path = 'coverage/coverage.lcov'
@@ -17,7 +17,7 @@ SimpleCov.start do
   enable_coverage :branch
 end
 
-require "computed_model"
+require "seven_model"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

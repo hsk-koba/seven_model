@@ -4,11 +4,11 @@ require 'spec_helper'
 require 'support/models/raw_user'
 require 'support/models/raw_book'
 
-RSpec.describe ComputedModel::Model do
+RSpec.describe SevenModel::Model do
   describe "simple inheritance" do
     it "mixes inherited fields" do
       base_klass = Class.new do
-        include ComputedModel::Model
+        include SevenModel::Model
 
         attr_reader :id
         def initialize(id)
@@ -51,7 +51,7 @@ RSpec.describe ComputedModel::Model do
   describe "missing inclusion" do
     it "errors on missing inclusion in the indirectly included module" do
       indirect_module = Module.new do
-        include ComputedModel::Model
+        include SevenModel::Model
       end
 
       expect {
@@ -68,7 +68,7 @@ RSpec.describe ComputedModel::Model do
     it 'allows redirecting helper methods via ActiveSupport::Concern' do
       indirect_module = Module.new do
         extend ActiveSupport::Concern
-        include ComputedModel::Model
+        include SevenModel::Model
       end
 
       expect {
@@ -86,7 +86,7 @@ RSpec.describe ComputedModel::Model do
   describe "invalid merger" do
     it "errors on multiple types on the same field" do
       base_klass = Class.new do
-        include ComputedModel::Model
+        include SevenModel::Model
 
         attr_reader :id
         def initialize(id)

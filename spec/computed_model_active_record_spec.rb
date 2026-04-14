@@ -4,7 +4,7 @@ require "spec_helper"
 require "support/models/raw_user"
 require "support/models/raw_book"
 
-RSpec.describe ComputedModel::ActiveRecord do
+RSpec.describe SevenModel::ActiveRecord do
   let!(:raw_user1) { create(:raw_user, name: "Alice") }
   let!(:raw_user2) { create(:raw_user, name: "Bob") }
 
@@ -111,7 +111,7 @@ RSpec.describe ComputedModel::ActiveRecord do
           "ComputedUser"
         end
 
-        include ComputedModel::Model
+        include SevenModel::Model
 
         attr_reader :id
 
@@ -121,7 +121,7 @@ RSpec.describe ComputedModel::ActiveRecord do
         end
 
         define_primary_loader :raw_user do |_subfields, ids:, **|
-          ComputedModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, strict_loading: false).map { |r| new(r) }
+          SevenModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, strict_loading: false).map { |r| new(r) }
         end
 
         delegate_dependency :name, to: :raw_user

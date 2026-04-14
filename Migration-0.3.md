@@ -1,18 +1,18 @@
 # v0.3.0 migration guide
 
-computed_model 0.3.0 comes with a number of breaking changes.
+seven_model 0.3.0 comes with a number of breaking changes.
 This guide will help you upgrade the library,
 but please test your program before deploying to production.
 
-## Major breaking: `ComputedModel` is now `ComputedModel::Model`
+## Major breaking: `SevenModel` is now `SevenModel::Model`
 
-https://github.com/wantedly/computed_model/pull/17
+https://github.com/wantedly/seven_model/pull/17
 
 Before:
 
 ```ruby
 class User
-  include ComputedModel
+  include SevenModel
 end
 ```
 
@@ -20,17 +20,17 @@ After:
 
 ```ruby
 class User
-  include ComputedModel::Model
+  include SevenModel::Model
 end
 ```
 
 
 ## Major breaking: Indirect dependencies are now rejected
 
-computed_model 0.3 checks if the requested field is a direct dependency.
-If not, it raises `ComputedModel::ForbiddenDependency`.
+seven_model 0.3 checks if the requested field is a direct dependency.
+If not, it raises `SevenModel::ForbiddenDependency`.
 
-https://github.com/wantedly/computed_model/pull/23
+https://github.com/wantedly/seven_model/pull/23
 
 ### Case 1
 
@@ -42,7 +42,7 @@ Before:
 class User
   dependency :bar
   computed def foo
-    baz  # Accepted in computed_model 0.2
+    baz  # Accepted in seven_model 0.2
     # ...
   end
 
@@ -83,7 +83,7 @@ class User
 end
 
 users = User.bulk_load_and_compute([:foo], ...)
-users[0].bar  # Accepted in computed_model 0.2
+users[0].bar  # Accepted in seven_model 0.2
 ```
 
 After:
@@ -121,14 +121,14 @@ class User
 end
 ```
 
-It was already fragile in computed_model 0.2.
-However, in computed_model 0.3,
-it always leads to `ComputedModel::ForbiddenDependency`.
+It was already fragile in seven_model 0.2.
+However, in seven_model 0.3,
+it always leads to `SevenModel::ForbiddenDependency`.
 
 
 ## Major breaking: `subdeps` are now called `subfields`
 
-https://github.com/wantedly/computed_model/pull/31
+https://github.com/wantedly/seven_model/pull/31
 
 Before:
 
@@ -150,15 +150,15 @@ We also recommend renaming block parameters named `subdeps` as `subfields`,
 although not strictly necessary.
 
 
-## Minor breaking: `computed_model_error` has been removed
+## Minor breaking: `seven_model_error` has been removed
 
-It was useful in computed_model 0.1 but no longer needed in computed_model 0.2.
+It was useful in seven_model 0.1 but no longer needed in seven_model 0.2.
 
-https://github.com/wantedly/computed_model/pull/18
+https://github.com/wantedly/seven_model/pull/18
 
 ```ruby
 # No longer possible
-self.computed_model_error = User::NotFound.new
+self.seven_model_error = User::NotFound.new
 ```
 
 ## Minor breaking: Behavior of `dependency` not directly followed by `computed def` has been changed.
@@ -174,12 +174,12 @@ end
 
 Otherwise `dependency` might be consumed by the next `define_loader` or `define_primary_loader`.
 
-https://github.com/wantedly/computed_model/pull/20
+https://github.com/wantedly/seven_model/pull/20
 
 Before:
 
 ```ruby
-dependency :foo  # dependency of bar in computed_model 0.2
+dependency :foo  # dependency of bar in seven_model 0.2
 
 define_loader :quux, key: -> { id } do
   # ...
@@ -210,7 +210,7 @@ Additionally, `dependency` before `define_primary_loader` will be an error.
 
 ## Minor breaking: Cyclic dependency is an error even if it is unused
 
-https://github.com/wantedly/computed_model/pull/24
+https://github.com/wantedly/seven_model/pull/24
 
 Before:
 
@@ -245,7 +245,7 @@ users = User.bulk_load_and_compute([], ...)  # Neither :foo nor :bar is used
 
 They now have special meaning, so you should avoid using them as a normal subdependency.
 
-https://github.com/wantedly/computed_model/pull/25
+https://github.com/wantedly/seven_model/pull/25
 
 ### `nil` and `false`
 
@@ -313,17 +313,17 @@ end
 
 ## Behavioral change: The order in which fields are loaded is changed
 
-https://github.com/wantedly/computed_model/pull/24
+https://github.com/wantedly/seven_model/pull/24
 
 Independent fields may be loaded in an arbitrary order. But implementation-wise, this is to some degree predictable.
 
-computed_model 0.3 uses different dependency resolution algorithm and may produce different orders.
-As a result, if your model is accidentally order-dependent, it may break with computed_model 0.3.
+seven_model 0.3 uses different dependency resolution algorithm and may produce different orders.
+As a result, if your model is accidentally order-dependent, it may break with seven_model 0.3.
 
 
-## Behavioral change: `ComputedModel::Model` now uses `ActiveSupport::Concern`
+## Behavioral change: `SevenModel::Model` now uses `ActiveSupport::Concern`
 
-It won't affect you if you simply did `include ComputedModel::Model` (previously `include ComputedModel`) and nothing more.
+It won't affect you if you simply did `include SevenModel::Model` (previously `include SevenModel`) and nothing more.
 Be cautious if you have a more complex inheritance/inclusion graph than that.
 
 

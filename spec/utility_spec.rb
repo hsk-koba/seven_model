@@ -5,7 +5,7 @@ require 'support/models/raw_user'
 require 'support/models/raw_user_extra'
 require 'support/models/raw_book'
 
-RSpec.describe ComputedModel::Model do
+RSpec.describe SevenModel::Model do
   let!(:raw_user1) { create(:raw_user, name: 'User One') }
   let!(:raw_user2) { create(:raw_user, name: 'User Two') }
   let!(:raw_user_extra1) { create(:raw_user_extra, id: raw_user1.id, token: 'abcdef') }
@@ -18,7 +18,7 @@ RSpec.describe ComputedModel::Model do
       def self.name; 'User'; end
       def self.to_s; 'User'; end
 
-      include ComputedModel::Model
+      include SevenModel::Model
 
       attr_reader :id
 

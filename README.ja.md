@@ -1,6 +1,6 @@
-# ComputedModel
+# SevenModel
 
-ComputedModelは依存解決アルゴリズムを備えた普遍的なバッチローダーです。
+SevenModelは依存解決アルゴリズムを備えた普遍的なバッチローダーです。
 
 - 依存解決アルゴリズムの恩恵により、抽象化を損なわずに以下の3つを両立させることができます。
   - ActiveRecord等から読み込んだデータを加工して提供する。
@@ -10,6 +10,24 @@ ComputedModelは依存解決アルゴリズムを備えた普遍的なバッチ�
 - データソースに依存しない普遍的な設計。HTTPで取得した情報とActiveRecordから取得した情報の両方を使う、といったこともできます。
 
 [English version](README.md)
+
+## 改名の理由
+
+SevenModel は ComputedModel からの新名称です。現在のサポート対象を **Rails 7 以降** に揃えたため、その方針が伝わる名前に変更しました。
+
+## ComputedModel からの移行
+
+```ruby
+# 旧
+require "computed_model"
+include ComputedModel::Model
+
+# 新
+require "seven_model"
+include SevenModel::Model
+```
+
+このリリースでは互換のため `ComputedModel` もエイリアスとして利用可能です。
 
 ## 解決したい問題
 
@@ -42,7 +60,7 @@ User.where(id: friend_ids).preload(:preference, :profile).map(&:display_name)
 
 これではせっかく `#display_name` を抽象化した意味が半減してしまいます。
 
-ComputedModelは依存解決アルゴリズムをバッチローダーに接続することでこの問題を解消します。
+SevenModelは依存解決アルゴリズムをバッチローダーに接続することでこの問題を解消します。
 
 ```ruby
 class User
@@ -62,7 +80,7 @@ end
 Gemfileに以下の行を追加:
 
 ```ruby
-gem 'computed_model', '~> 0.3.0'
+gem 'seven_model', '~> 0.3.0'
 ```
 
 その後、以下を実行:
@@ -71,19 +89,19 @@ gem 'computed_model', '~> 0.3.0'
 
 または直接インストール:
 
-    $ gem install computed_model
+    $ gem install seven_model
 
 ## 動かせるサンプルコード
 
 ```ruby
-require 'computed_model'
+require 'seven_model'
 
 # この2つを外部から取得したデータとみなす (ActiveRecordやHTTPで取得したリソース)
 RawUser = Struct.new(:id, :name, :title)
 Preference = Struct.new(:user_id, :name_public)
 
 class User
-  include ComputedModel::Model
+  include SevenModel::Model
 
   attr_reader :id
   def initialize(raw_user)
@@ -145,11 +163,11 @@ users.map(&:title) # => ["Mr. ", "Dr. "]
 
 ## Active Record 向けヘルパー（7.2+）
 
-ランタイム依存は Active Support のみです。Active Record が必要なオプション機能は **`ComputedModel::ActiveRecord`** にあります。`require "computed_model"` のあとに定数を参照すると autoload されます。明示する場合は次のとおりです。
+ランタイム依存は Active Support のみです。Active Record が必要なオプション機能は **`SevenModel::ActiveRecord`** にあります。`require "seven_model"` のあとに定数を参照すると autoload されます。明示する場合は次のとおりです。
 
 ```ruby
-require "computed_model"
-require "computed_model/active_record"
+require "seven_model"
+require "seven_model/active_record"
 ```
 
 主な API:
@@ -164,7 +182,7 @@ require "computed_model/active_record"
 
 ```ruby
 define_primary_loader :raw_user do |_subfields, ids:, **|
-  rows = ComputedModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
+  rows = SevenModel::ActiveRecord.records_by_ids_in_order(RawUser, ids, chunk_size: 500)
   rows.map { |r| User.new(r) }
 end
 ```
@@ -174,7 +192,7 @@ end
 ```ruby
 define_loader :things, key: -> { id } do |ids, _subfields, **|
   rows = Thing.where(user_id: ids)
-  ComputedModel::ActiveRecord.index_rows_by(rows, column: :user_id)
+  SevenModel::ActiveRecord.index_rows_by(rows, column: :user_id)
 end
 ```
 
@@ -200,4 +218,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/wantedly/computed_model.
+Bug reports and pull requests are welcome on GitHub at https://github.com/wantedly/seven_model.
